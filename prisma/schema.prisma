@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")  //this tell prisma to use connection string  from your .env file
+}
+
+model User {
+  id        Int        @id @default(autoincrement())
+  name      String
+  email     String     @unique
+  phone     String
+  password  String
+  role      String     @default("customer")
+  bookings  Booking[]
+  cartItems CartItem[]
+  createdAt DateTime   @default(now())
+}
+
+model Room {
+    id          Int       @id @default(autoincrement())
+  roomNumber  String    @unique
+  type        String
+  price       Float
+  capacity    Int       @default(1)
+  status      String    @default("available") // available | booked | maintenance
+  description String?
+  imageUrl    String?
+  amenities   String[]
+  bookings    Booking[]
+  cartItems   CartItem[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+}
+
+
+model Booking {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  roomId      Int
+  checkIn     DateTime
+  checkOut    DateTime
+  totalPrice  Float
+  status      String   @default("pending") // pending | confirmed | checked-in | checked-out | cancelled
+  paymentStatus String @default("unpaid")  // unpaid | paid | refunded
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  room Room @relation(fields: [roomId], references: [id])
+}
+
+model CartItem {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  roomId    Int
+  checkIn   DateTime
+  checkOut  DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  room Room @relation(fields: [roomId], references: [id])
+}
+
