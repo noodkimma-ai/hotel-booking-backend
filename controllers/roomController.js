@@ -89,4 +89,49 @@ const deleteRoom = async(req,res)=>{
         
     }
 }
+
+const getAvailableRooms = async(req, res)=>{
+    try {
+        const {checkIn, checkOut, guests} = req.query;
+        const overLapBooking = await prisma.booking.findMany({
+            where:{
+               AND:[{
+                checkOut:{
+                    gt:checkIn   //search ko checkout should be greater than booking checkIn
+                }
+            },
+            {
+                checkIn:{
+                    lt:checkOut    //search ko checkout should be less than booking checkout
+                }
+            
+               }
+            ]
+            }
+        });
+
+        const bookRoomIds  = overLapBooking.map((booking)=>{ 
+            return booking.roomId;  //Kinabhane map() le naya array banauna return value chainxa.
+             })    //overLapBooking bhitra multiple room hola aba hami bookinng ma yaota booking linxa map la tesoile la booking use garxam asa parameter
+          
+             const availablerooms = await prisma.room.findMany({
+              where:{
+                NOT:{
+                    id:{
+                    in : bookRoomIds
+                    }  // yesko matlab jun bookroomIds ma jun room overlap bhako room ko id ako xa ni tyo bahek aru room ko id dew 
+                },
+                capacity:{
+                    gte:Number(guests)  //capacity should be greater than or equal to number of guests 
+                }
+
+             }
+          })
+
+          res.json(availablerooms);
+        
+    } catch (error) {
+        
+    }
+}
 module.exports = {getAllRoom, createRoom, updateRoom, deleteRoom};
