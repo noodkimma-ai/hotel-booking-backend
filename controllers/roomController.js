@@ -92,17 +92,20 @@ const deleteRoom = async(req,res)=>{
 
 const getAvailableRooms = async(req, res)=>{
     try {
+        
         const {checkIn, checkOut, guests} = req.query;
+        const searchCheckIn = new Date(checkIn);
+        const SearchCheckOut = new Date(checkOut);
         const overLapBooking = await prisma.booking.findMany({
             where:{
                AND:[{
                 checkOut:{
-                    gt:checkIn   //search ko checkout should be greater than booking checkIn
+                    gt:searchCheckIn   //search ko checkout should be greater than booking checkIn
                 }
             },
             {
                 checkIn:{
-                    lt:checkOut    //search ko checkout should be less than booking checkout
+                    lt:SearchCheckOut   //search ko checkout should be less than booking checkout
                 }
             
                }
@@ -131,7 +134,13 @@ const getAvailableRooms = async(req, res)=>{
           res.json(availablerooms);
         
     } catch (error) {
+        res.status(500).json(
+            {
+                message:"Internal server Error",
+                error:error.message,
+            }
+        );
         
     }
 }
-module.exports = {getAllRoom, createRoom, updateRoom, deleteRoom};
+module.exports = {getAllRoom, createRoom, updateRoom, deleteRoom, getAvailableRooms};
