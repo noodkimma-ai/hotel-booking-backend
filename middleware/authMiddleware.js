@@ -9,8 +9,12 @@ const jwt = require("jsonwebtoken");
     }
     try{
     const token = authHeader.split(" ")[1];
+    console.log("Token: ", token);
+    console.log("SECRET EXISTS:", !!process.env.JWT_SECRET);
     const decode = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("DECODE: ", decode);
     req.user = decode;
+    next(); //yesley k garxa bhaney jun route ma xa ni authmiddleware, create booking function authmiddle ware paxi next function run garxa bhaney ko left to right function
     }catch(error){
         return res.status(401).json({
             message:"Invalid or expire token"
@@ -18,3 +22,4 @@ const jwt = require("jsonwebtoken");
     }
 
  }
+ module.exports= authMiddleware;

@@ -1,16 +1,29 @@
-import { message } from "antd";
+const prisma = require("../prisma/client");
 
 const createBooking = async(req, res)=>{
     try{
-        const {cartItem } = req.body;
-        const userId = req.user.userID;
+
+        console.log("CREATEBOOKING TERMINAL HIT");
+        console.log("User: ", req.user);
+        console.log("BODY: ", req.body);
+        const {cartItems, checkIn, checkOut, guests } = req.body;
+
+        console.log("Check In: ", checkIn);
+        console.log("CHECKOUT: ", checkOut);
+        const userId = req.user.userId;
         const searchCheckIn = new Date(checkIn);
         const searchCheckOut = new Date(checkOut);
-        for (const item of cartItem){    // yo item bhitra cartItem ko harek room ko object hunxxa
+
+        console.log("SEARCH CHEK IN: ", searchCheckIn);
+        console.log("SEARCH CHECKOUT: ", searchCheckOut);
+        const MILLIINSECOND_IN_ONE_DAY = 24 * 60 * 60 * 1000;  //calculate 1 day time in millisecond
+
+        const totalNight = (searchCheckOut - searchCheckIn) / MILLIINSECOND_IN_ONE_DAY ;
+        for (const item of cartItems){    // yo item bhitra cartItem ko harek room ko object hunxxa
 
               const room = await prisma.room.findUnique({   //pahila database ma bhako room find garney
             where:{
-                roomId:item.id,
+                id:item.id,
             },
         });
 
@@ -19,15 +32,15 @@ const createBooking = async(req, res)=>{
                 message:"room not found",
             });
         }
-            const overLappingBooking = await prisma.Booking.findMany({   //yesma overlap bhako booking nikalney 
+            const overLappingBooking = await prisma.booking.findMany({   //yesma overlap bhako booking nikalney 
                 where:{
                     roomId:item.id,
-                    price:item.price,
+                    // price:item.price,
                     AND:[{
                       checkOut:{
                         gt:searchCheckIn
                       },
-                      checkIN:{
+                      checkIn:{
                         lt:searchCheckOut
                       }
                     },
@@ -45,11 +58,11 @@ const createBooking = async(req, res)=>{
             const totalPrice = room.price * totalNight;
 
 
-            await prism.Booking.create({
+            await prisma.Booking.create({
                 data:{
                     userId,
                     roomId:item.id,
-                    checkIN:searchCheckIn,
+                    checkIn:searchCheckIn,
                     checkOut:searchCheckOut,
                     totalPrice,
                 }
@@ -57,6 +70,10 @@ const createBooking = async(req, res)=>{
 
           
         }
+
+        return res.status(201).json({
+           message:"Booking successfully",
+        })
         
     }catch(error){
         console.log(error);
@@ -66,3 +83,5 @@ const createBooking = async(req, res)=>{
         });
     };
 }
+
+module.exports = {createBooking};
