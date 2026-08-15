@@ -2,12 +2,14 @@ const express = require('express');
 const router = express.Router();  //express ko router babanona aba yo router ko booking sambhandhi saboi route manage garxa 
 const prisma = require('../prisma/client');
 const authMiddleware = require('../middleware/authMiddleware');   // booking garna login gareko user ,atra paoxa 
-const {createBooking} = require('../controllers/bookingController');  // router la request receive garxa but actual businnes logic controller ma hunxa 
+const {createBooking, getMyBookings} = require('../controllers/bookingController');  // router la request receive garxa but actual businnes logic controller ma hunxa 
 
 
 
 
-router.post("/", authMiddleware, createBooking);
+router.post("/", authMiddleware, createBooking);   // frontend bata ako xa pathjun server ma xa so yeta just / gareko tyo path aru kae chahidoina 
+
+router.get("/my-bookings", authMiddleware, getMyBookings); // my-booking yo frontend la magda kun route use garney so hami frontend ma use garxu url ma yo backend ko route
 module.exports= router;
 
 // // CREATE a booking

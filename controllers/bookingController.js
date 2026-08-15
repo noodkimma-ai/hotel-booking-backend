@@ -84,4 +84,26 @@ const createBooking = async(req, res)=>{
     };
 }
 
-module.exports = {createBooking};
+const getMyBookings = async(req, res)=>{
+    try{
+
+        const {userId} =req.user; //  token ma userId decode garera req.user ma rakheko xa so 
+       const bookings = await prisma.booking.findMany({   //yesma userId jako login gareko xa ani database ma userId milxa database ko userId sanga tesko booking nikalney
+        where:{
+            userId:userId    //database ma login gareko userId is similar ko database ko userId
+        }, 
+        include:{          //iclude matlab relatable table ko data pani layao  
+            room:true        //booking ko sato hamiloi room ko detail ni cahiyo so room 
+        }
+       })
+
+       return res.status(200).json({
+        message:"Booking fecthed successfully",
+        bookings: bookings, //database bata ayeko actual booking data
+       });
+    }catch(error){
+        console.log(error);
+    }
+}
+
+module.exports = {createBooking, getMyBookings};
