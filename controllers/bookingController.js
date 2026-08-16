@@ -1,3 +1,4 @@
+const { message } = require("antd");
 const prisma = require("../prisma/client");
 
 const createBooking = async(req, res)=>{
@@ -106,4 +107,24 @@ const getMyBookings = async(req, res)=>{
     }
 }
 
-module.exports = {createBooking, getMyBookings};
+const getAllBookings = async(req, res)=>{
+    try {
+         const bookings = await prisma.booking.findMany({
+            include:{
+                user:true,
+                room:true,
+            },
+         });
+         return res.status(200).json({
+            message:"All Booking Fetch successfully",
+            bookings:bookings,
+         });
+    } catch (error) {
+        console.log("Failed to fetch all booking: ", error);
+        return res.status(500).json({
+            message:"Failed to fetch"
+        });
+    }
+};
+
+module.exports = {createBooking, getMyBookings, getAllBookings};
