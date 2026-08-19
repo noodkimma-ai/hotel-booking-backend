@@ -127,4 +127,28 @@ const getAllBookings = async(req, res)=>{
     }
 };
 
-module.exports = {createBooking, getMyBookings, getAllBookings};
+const updateBookingStatus = async(req, res)=>{
+    try {
+        const {id}= req.params;
+        const {status} = req.body;const booking = await prisma.booking.update({
+            where:{
+              id:Number(id),
+            },
+            data:{
+                status:status,
+            },
+        });
+        return res.status(200).json({
+            message:"Booking status update successfully",
+            booking:booking,
+        });
+    } catch (error) {
+        console.log("error update booking status");
+        return res.status(500).json({
+            message:"Failed to update boking status"
+        });
+        
+    }
+}
+
+module.exports = {createBooking, getMyBookings, getAllBookings, updateBookingStatus};
